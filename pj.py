@@ -43,7 +43,34 @@ from sklearn.neighbors import KNeighborsClassifier
 Mohinh_KNN = KNeighborsClassifier
 Mohinh_KNN = KNeighborsClassifier(n_neighbors=9)
 Mohinh_KNN.fit(X_train, y_train)
-# d-i.
-y_pred = Mohinh_KNN.predict(X_test)
-from sklearn.metrics import accuracy_score
-print(accuracy_score(y_test, y_pred))
+
+from sklearn.model_selection import KFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import f1_score
+kf = KFold(n_splits=17, shuffle=True)
+
+#X = data.iloc[:,1:4]
+#y = data.iloc[:,4:5]
+avg = [0.0, 0.0, 0.0, 0.0];
+for train_index, test_index in kf.split(X):
+    #print("Train:", train_index, "TEST:", test_index)
+    X_train, X_test = X.iloc[train_index,], X.iloc[test_index,]
+    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+    #print ("X_test len:", len(X_test), " X_train len:", len(X_train))
+    clf_entropy = DecisionTreeClassifier(criterion = "entropy", random_state = 50)
+    clf_entropy.fit(X_train, y_train)
+    
+    y_pred = clf_entropy.predict(X_test)
+    #print(f1_score(y_test, y_pred, labels = ["unacc", "acc", "good", "vgood"], average=None))
+    
+    f1 = f1_score(y_test, y_pred, labels = ["unacc", "acc", "good", "vgood"], average=None)
+    avg[0] = avg[0] + f1[0]
+    avg[1] = avg[1] + f1[1]
+    avg[2] = avg[2] + f1[2]
+    avg[3] = avg[3] + f1[3]
+    #print("=======================")
+    
+print(avg[0]/17)
+print(avg[1]/17)
+print(avg[2]/17)
+print(avg[3]/17)
